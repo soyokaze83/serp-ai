@@ -205,3 +205,6 @@ poetry.toml
 
 # LSP config files
 pyrightconfig.json
+
+# Certification
+*.crt
