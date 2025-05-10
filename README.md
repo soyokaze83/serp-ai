@@ -18,7 +18,7 @@ SERP AI adalah proyek open-source yang dirancang untuk menyediakan platform yang
 
 We use FastAPI and NextJS as frameworks for both backend and frontend respectively, where due to this being a small scale application and to optimize search speed, we'll be applying a monolithic structure to our system. Here are the following commands to first setup and then run each stack:
 
-```
+```bash
 # FastAPI Python Setup (with default python)
 cd backend/
 python -m venv .venv
@@ -36,13 +36,25 @@ cd frontend/
 npm install .
 ```
 
+## Elastic Search Local Development (For Developers)
+
+We setup the Elastic Search index (without Kibana) for local development through the docker tutorial provided in this specific [section](https://www.elastic.co/docs/deploy-manage/deploy/self-managed/install-elasticsearch-docker-basic#_start_a_single_node_cluster) of the Elastic Search documentation. Here's how we set it up based on the documentation:
+
+```bash
+# Setup Docker Container
+docker network create elastic
+docker pull docker.elastic.co/elasticsearch/elasticsearch:9.0.0
+docker run --name es01 --net elastic -p 9200:9200 -it -m 1GB docker.elastic.co/elasticsearch/elasticsearch:9.0.0
+
+# Test cURL Command
+export ELASTIC_PASSWORD="your_password"
+docker cp es01:/usr/share/elasticsearch/config/certs/http_ca.crt .
+curl --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200
+```
+
 ## Elastic Search Hosted Deployment (For Developers)
 
 We have deployed our productoin Elastic Search index on [Bonsai](https://bonsai.io/). To try and request data from the API, you can simply cURL the URL therefore you need to provide the deployed production URL for the index.
-
-## Elastic Search Hosted Deployment
-
-We have deployed our search index named `serp-ai-index` using Elastic Cloud services. To try and request data from the REST API, you can use the following cURL syntax run through a Linux distro or a Windows Subsystem for Linux (WSL):
 
 ```
 export ELASTIC_URL="ES_PROJECT_URL"
