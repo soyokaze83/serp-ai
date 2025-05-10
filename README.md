@@ -36,14 +36,17 @@ cd frontend/
 npm install .
 ```
 
+## Elastic Search Hosted Deployment (For Developers)
+
+We have deployed our productoin Elastic Search index on [Bonsai](https://bonsai.io/). To try and request data from the API, you can simply cURL the URL therefore you need to provide the deployed production URL for the index.
+
 ## Elastic Search Hosted Deployment
 
 We have deployed our search index named `serp-ai-index` using Elastic Cloud services. To try and request data from the REST API, you can use the following cURL syntax run through a Linux distro or a Windows Subsystem for Linux (WSL):
 
 ```
-export ELASTIC_PASSWORD="YOUR_PASSWORD"
-export ELASTIC_URL="YOUR_URL"
-curl -u elastic:$ELASTIC_PASSWORD $ELASTIC_URL
+export ELASTIC_URL="ES_PROJECT_URL"
+curl $ELASTIC_URL
 ```
 
-Note that this means you would need to set the environment variables for `ELASTIC_PASSWORD` and `ELASTIC_URL` which can be done through the setup in Elastic Cloud.
+Note that this means you would need to set the environment variables for `ELASTIC_URL`.
