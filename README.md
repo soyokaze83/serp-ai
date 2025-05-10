@@ -4,6 +4,7 @@
 
 - Vincent Suhardi (2206082505)
 - Alwin Djuliansah (2206813504)
+- Austin Susanto (2206025060)
 
 ## Overview
 
