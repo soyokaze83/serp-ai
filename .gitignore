@@ -208,3 +208,7 @@ pyrightconfig.json
 
 # Certification
 *.crt
+
+# Project Specific
+data/
+notebook/
