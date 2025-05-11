@@ -1,6 +1,7 @@
 import json
 import os
 
+from argparse import ArgumentParser
 from typing import List, Dict
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
@@ -15,6 +16,9 @@ class ESIngest:
     """
     Ingests document data into Elasticsearch index.
     """
+
+    def __init__(self):
+        self.client = None  # Initiate the client
 
     def ndjson_to_ls(self, ndjson_filepath: str):
         """Convert document information in NDJSON to ingestable list."""
@@ -31,7 +35,7 @@ class ESIngest:
                     root_properties = doc[0]["index"]
                     root_properties["_source"] = doc[1]
                     doc = []
-                results.append(root_properties)
+                    results.append(root_properties)
 
         return results
 
@@ -56,6 +60,45 @@ class ESIngest:
 
         return self.client
 
+    def data_ingest(self, doc_ls: List[Dict]):
+        """Bulk data ingestion of documents into Elasticsearch index."""
+        if not self.client:
+            raise ValueError("Client not yet set, please connect to a client.")
+
+        try:
+            success_count, errors = bulk(
+                client=es_client,
+                actions=doc_ls,
+                # refresh="wait_for", # Optional: makes docs immediately searchable, use for testing, not high-load prod
+                # chunk_size=500,     # Optional: Number of docs to send in a single request (default 500)
+                # request_timeout=30  # Optional: Timeout for each chunk request (default 10s)
+            )
+            print(f"Successfully indexed {success_count} documents.")
+            if errors:
+                print(f"Encountered {len(errors)} errors:")
+                for i, error_info in enumerate(errors):
+                    print(f"Error {i+1}: {error_info}")
+
+        except Exception as e:
+            print(f"An exception occurred during bulk indexing: {e}")
+
 
 if __name__ == "__main__":
-    pass
+
+    hosts = ["https://localhost:9200"]
+
+    argparse = ArgumentParser()
+    argparse.add_argument("--ndjson")
+    argparse.add_argument("--ca_cert")
+    args = argparse.parse_args()
+
+    print(f"Password: {password}")
+
+    es_ingestor = ESIngest()
+    doc_ls = es_ingestor.ndjson_to_ls(args.ndjson)
+    es_client = es_ingestor.es_connect(
+        hosts=hosts, cert_path=args.ca_cert, username=username, password=password
+    )
+
+    # Ingest list of documents to index
+    es_ingestor.data_ingest(doc_ls=doc_ls)
