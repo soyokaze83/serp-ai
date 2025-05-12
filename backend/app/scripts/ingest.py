@@ -55,8 +55,8 @@ class ESIngest:
 
     def create_index(self, custom_mapping: Dict, index_name: str = "serp-ai"):
         """Rewrite index creation with index_name."""
-        self.client.indices.delete(index="serp-ai", ignore_unavailable=True)
-        self.client.indices.create(index="serp-ai", mappings=custom_mapping)
+        self.client.indices.delete(index=index_name, ignore_unavailable=True)
+        self.client.indices.create(index=index_name, mappings=custom_mapping)
 
         return self.client
 
