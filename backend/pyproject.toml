@@ -3,11 +3,12 @@ name = "backend"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.9"
 dependencies = [
     "bibtexparser>=1.4.3",
     "elasticsearch>=9.0.1",
     "fastapi[standard]>=0.115.12",
     "ipykernel>=6.29.5",
     "python-dotenv>=1.1.0",
+    "sentence-transformers>=4.1.0",
 ]
