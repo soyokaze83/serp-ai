@@ -43,10 +43,21 @@ class Parser:
         # Make all keys lowercase for consistency in Elasticsearch
         entry_lower = {k.lower(): v for k, v in entry.items()}
 
+        # Concatenate title and abstract
+        title = entry_lower.get("title")
+        abstract = entry_lower.get("abstract")
+        if title and abstract:
+            text = title + " " + abstract
+            text = text.strip()
+        else:
+            text = title if title else abstract
+
         doc_source = {
             "citekey": entry_lower.get("id"),  # 'ID' becomes 'id' after lowercasing
             "entry_type": entry_lower.get("entrytype"),
-            "title": entry_lower.get("title"),
+            "title": title,  # Re-insert title for display
+            "abstract": abstract,  # Re-insert abstract for display
+            "text": text,  # Concatenated text
             "booktitle": entry_lower.get("booktitle"),
             "journal": entry_lower.get("journal"),
             "year": entry_lower.get("year"),
@@ -58,7 +69,6 @@ class Parser:
             "publisher": entry_lower.get("publisher"),
             "url": entry_lower.get("url"),
             "doi": entry_lower.get("doi"),
-            "abstract": entry_lower.get("abstract"),
             "keywords": entry_lower.get("keywords"),  # Often a comma-separated string
         }
 
@@ -135,9 +145,7 @@ class Parser:
             if transformed_entry.get("citekey"):  # Only add if we have a citekey
                 elasticsearch_docs.append(transformed_entry)
             else:
-                print(
-                    f"Warning: Skipping entry without a citekey: {entry.get('title', 'N/A')[:50]}..."
-                )
+                print(f"Warning: Skipping entry without a citekey")
 
         return elasticsearch_docs
 

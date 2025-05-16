@@ -92,13 +92,42 @@ if __name__ == "__main__":
     argparse.add_argument("--ca_cert")
     args = argparse.parse_args()
 
-    print(f"Password: {password}")
-
     es_ingestor = ESIngest()
-    doc_ls = es_ingestor.ndjson_to_ls(args.ndjson)
     es_client = es_ingestor.es_connect(
         hosts=hosts, cert_path=args.ca_cert, username=username, password=password
     )
+
+    # Recreate the index
+    custom_mapping = {
+        "properties": {
+            "citekey": {"type": "keyword"},
+            "entry_type": {"type": "keyword"},
+            "title": {"type": "text"},
+            "abstract": {"type": "text"},
+            "text": {
+                "type": "text",
+                "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+            },
+            "year": {"type": "integer"},
+            "month": {"type": "keyword"},
+            "address": {"type": "keyword"},
+            "publisher": {
+                "type": "text",
+                "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+            },
+            "url": {"type": "keyword"},
+            "authors": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+            "editors": {"type": "keyword", "fields": {"text": {"type": "text"}}},
+            "booktitle": {
+                "type": "text",
+                "fields": {"keyword": {"type": "keyword", "ignore_above": 256}},
+            },
+            "pages": {"type": "keyword"},
+        }
+    }
+
+    es_client = es_ingestor.create_index(custom_mapping, index_name="serp-ai")
+    doc_ls = es_ingestor.ndjson_to_ls(args.ndjson)
 
     # Ingest list of documents to index
     es_ingestor.data_ingest(doc_ls=doc_ls)
