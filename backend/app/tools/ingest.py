@@ -1,4 +1,6 @@
 import json
+import base64
+import re
 import os
 
 from argparse import ArgumentParser
@@ -8,8 +10,6 @@ from elasticsearch.helpers import bulk
 from dotenv import load_dotenv
 
 load_dotenv()
-username = os.environ.get("ELASTIC_USERNAME")
-password = os.environ.get("ELASTIC_PASSWORD")
 
 
 class ESIngest:
@@ -40,12 +40,24 @@ class ESIngest:
         return results
 
     def es_connect(
-        self, hosts: List[str], cert_path: str, username: str, password: str
+        self,
+        hosts: List[str],
+        prod=True,
+        api_key: str = None,
+        username: str = None,
+        password: str = None,
+        cert_path: str = None,
     ):
         """Connect to Elasticsearch and return client."""
-        es_client = Elasticsearch(
-            hosts=hosts, ca_certs=cert_path, basic_auth=(username, password)
-        )
+
+        if prod:
+            if not api_key:
+                raise ValueError("No API key found!")
+            es_client = Elasticsearch(hosts, api_key=api_key)
+        else:
+            es_client = Elasticsearch(
+                hosts=hosts, ca_certs=cert_path, basic_auth=(username, password)
+            )
 
         if not es_client.ping():
             raise ValueError("Failed to connect to Elasticsearch client.")
@@ -85,16 +97,31 @@ class ESIngest:
 
 if __name__ == "__main__":
 
-    hosts = ["https://localhost:9200"]
-
     argparse = ArgumentParser()
     argparse.add_argument("--ndjson")
     argparse.add_argument("--ca_cert")
+    argparse.add_argument("--prod", action="store_true")
     args = argparse.parse_args()
+
+    username = ""
+    password = ""
+    api_key = ""
+    if args.prod:
+        hosts = os.environ.get("ELASTIC_URL_PROD")
+        api_key = os.environ.get("API_KEY")
+    else:
+        hosts = os.environ.get("ELASTIC_URL_DEV")
+        username = os.environ.get("ELASTIC_USERNAME")
+        password = os.environ.get("ELASTIC_PASSWORD")
 
     es_ingestor = ESIngest()
     es_client = es_ingestor.es_connect(
-        hosts=hosts, cert_path=args.ca_cert, username=username, password=password
+        hosts=hosts,
+        api_key=api_key,
+        prod=args.prod,
+        cert_path=args.ca_cert,
+        username=username,
+        password=password,
     )
 
     # Recreate the index

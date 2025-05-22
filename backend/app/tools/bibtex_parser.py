@@ -8,6 +8,7 @@ from bibtexparser.customization import (
 import json
 from argparse import ArgumentParser
 from typing import List, Dict, Any, Optional
+from tqdm.auto import tqdm
 
 
 class Parser:
@@ -133,16 +134,17 @@ class Parser:
             return []
 
         try:
+            print(f"Parsing BibTeX content from {filepath}...")
             bib_database = bibtexparser.loads(bibtex_string, parser=self._parser)
+            print(f"Parsed {len(bib_database.entries)} entries.")
         except Exception as e:
             print(f"Error parsing BibTeX content from {filepath}: {e}")
-            # You might want to inspect bib_database.failed_blocks here if available
             return []
 
         elasticsearch_docs = []
-        for entry in bib_database.entries:
+        for entry in tqdm(bib_database.entries, desc="Transforming BibTeX entries"):
             transformed_entry = self._transform_entry(entry)
-            if transformed_entry.get("citekey"):  # Only add if we have a citekey
+            if transformed_entry.get("citekey"):
                 elasticsearch_docs.append(transformed_entry)
             else:
                 print(f"Warning: Skipping entry without a citekey")
@@ -153,7 +155,7 @@ class Parser:
         self,
         documents: List[Dict[str, Any]],
         index_name: str,
-        output_filepath: str = None,
+        output_filepath: Optional[str] = None,
     ) -> List[str]:
         """
         Generates NDJSON lines for Elasticsearch bulk ingestion.
@@ -161,12 +163,13 @@ class Parser:
         Args:
             documents: A list of parsed document dictionaries.
             index_name: The name of the Elasticsearch index.
+            output_filepath: Optional path to write the NDJSON data to.
 
         Returns:
             A list of strings, where each pair of strings represents an action and a document.
         """
         ndjson_lines = []
-        for doc_source in documents:
+        for doc_source in tqdm(documents, desc="Generating NDJSON lines"):
             action = {"index": {"_index": index_name}}
             # Use citekey as the document ID if it's unique and suitable
             if "citekey" in doc_source and doc_source["citekey"]:
@@ -178,7 +181,9 @@ class Parser:
         if output_filepath:
             try:
                 with open(output_filepath, "w", encoding="utf-8") as f:
-                    for line in ndjson_lines:
+                    for line in tqdm(
+                        ndjson_lines, desc=f"Writing to {output_filepath}"
+                    ):
                         f.write(line + "\n")
                 print(f"NDJSON data successfully written to: {output_filepath}")
             except IOError as e:
@@ -192,12 +197,18 @@ class Parser:
 if __name__ == "__main__":
 
     argparse = ArgumentParser()
-    argparse.add_argument("--bib_path")
-    argparse.add_argument("--output_path")
+    argparse.add_argument(
+        "--bib_path", required=True, help="Path to the input BibTeX file."
+    )
+    argparse.add_argument("--output_path", help="Path to the output NDJSON file.")
     args = argparse.parse_args()
 
     bib_parser = Parser()
     parsed_docs = bib_parser.parse_file(args.bib_path)
-    bib_parser.generate_ndjson_for_bulk_api(
-        parsed_docs, index_name="serp-ai", output_filepath=args.output_path
-    )
+
+    if parsed_docs:
+        bib_parser.generate_ndjson_for_bulk_api(
+            parsed_docs, index_name="serp-ai", output_filepath=args.output_path
+        )
+    else:
+        print("No documents parsed. Exiting.")
