@@ -9,18 +9,12 @@ from elasticsearch import Elasticsearch
 from sentence_transformers import CrossEncoder
 from contextlib import asynccontextmanager
 from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
 import os
 
 load_dotenv()
 ES_HOSTS = os.environ.get("ELASTIC_URL_PROD")
 API_KEY = os.environ.get("API_KEY")
-
-# LOCAL DEVELOPMENT
-# ES_CERT_PATH = (
-#     "http_ca.crt"
-# )
-# ES_USERNAME = os.environ.get("ELASTIC_USERNAME")
-# ES_PASSWORD = os.environ.get("ELASTIC_PASSWORD")
 
 
 CROSS_ENCODER_MODEL_NAME = os.environ.get(
@@ -32,12 +26,6 @@ CROSS_ENCODER_MODEL_NAME = os.environ.get(
 async def lifespan(app: FastAPI):
     print("Attempting to connect to Elasticsearch...")
     try:
-        # LOCAL DEVELOPMENT
-        # app.state.es_client = Elasticsearch(
-        #     hosts=ES_HOSTS,
-        #     ca_certs=ES_CERT_PATH,
-        #     basic_auth=(ES_USERNAME, ES_PASSWORD),
-        # )
 
         app.state.es_client = Elasticsearch(hosts=ES_HOSTS, api_key=API_KEY)
         if not app.state.es_client.ping():
@@ -71,6 +59,14 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
