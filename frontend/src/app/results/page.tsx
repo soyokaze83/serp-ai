@@ -48,13 +48,13 @@ export default function SearchResults() {
     );
     const [searchQuery, setSearchQuery] = useState("");
     const [isDarkMode, setIsDarkMode] = useState(false);
+    const [summary, setSummary] = useState("");
+    const [isSummarizing, setIsSummarizing] = useState(false);
 
     useEffect(() => {
-        // Check for dark mode
         const darkMode = document.documentElement.classList.contains("dark");
         setIsDarkMode(darkMode);
 
-        // Get search results from sessionStorage
         const results = sessionStorage.getItem("searchResults");
         const query = sessionStorage.getItem("searchQuery");
 
@@ -62,7 +62,6 @@ export default function SearchResults() {
             setSearchResults(JSON.parse(results));
             setSearchQuery(query);
         } else {
-            // Redirect back to home if no results
             window.location.href = "/";
         }
     }, []);
@@ -103,6 +102,55 @@ export default function SearchResults() {
             </div>
         );
     }
+
+    const handleSummarizeResults = async () => {
+        if (!searchResults || !searchQuery) return;
+
+        setIsSummarizing(true);
+        setSummary("");
+
+        try {
+            const response = await fetch(
+                `https://moral-kiah-soyokaze83-45241348.koyeb.app/summarize_documents_stream`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        query: searchQuery,
+                        documents: searchResults.reranked_hits,
+                    }),
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Summarization failed: ${response.statusText}`);
+            }
+
+            if (!response.body) {
+                throw new Error("Response body is null");
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let done = false;
+
+            while (!done) {
+                const { value, done: readerDone } = await reader.read();
+                done = readerDone;
+                if (value) {
+                    const chunk = decoder.decode(value, { stream: true });
+                    setSummary((prev) => prev + chunk);
+                }
+            }
+        } catch (error) {
+            console.error("Summarization error:", error);
+            setSummary("Failed to generate summary. Please try again.");
+        } finally {
+            setIsSummarizing(false);
+        }
+    };
 
     return (
         <div
@@ -159,17 +207,27 @@ export default function SearchResults() {
                         Search Results for &ldquo;{searchQuery}&rdquo;
                     </h1>
                     <p
-                        className={`text-lg ${
+                        className={`text-lg mb-2 ${
                             isDarkMode ? "text-slate-300" : "text-slate-600"
                         }`}
                     >
                         Found {searchResults.initial_hits_count} results (
                         {searchResults.reranked_hits.length} shown)
                     </p>
+                    <Button onClick={handleSummarizeResults} disabled={isSummarizing} className="cursor-pointer">
+                        {isSummarizing ? "Summarizing..." : "✨ Generate Summary"}
+                    </Button>
                 </div>
 
-                {/* Results Grid */}
                 <div className="space-y-6">
+
+                    {summary && (
+                        <Card className="mt-6 mb-8">
+                            <CardHeader><CardTitle>AI Summary</CardTitle></CardHeader>
+                            <CardContent><pre className="whitespace-pre-wrap">{summary}</pre></CardContent>
+                        </Card>
+                    )}
+
                     {searchResults.reranked_hits.map((result, index) => (
                         <Card
                             key={result._id}

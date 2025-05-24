@@ -16,7 +16,6 @@ export default function SearchLanding() {
     const [showMobileMenu, setShowMobileMenu] = useState(false);
     const [isDarkMode, setIsDarkMode] = useState(false);
 
-    // Initialize dark mode from localStorage
     useEffect(() => {
         const savedTheme = localStorage.getItem("theme");
         const prefersDark = window.matchMedia(
@@ -29,7 +28,6 @@ export default function SearchLanding() {
         }
     }, []);
 
-    // Toggle dark mode
     const toggleDarkMode = () => {
         const newDarkMode = !isDarkMode;
         setIsDarkMode(newDarkMode);
@@ -43,12 +41,10 @@ export default function SearchLanding() {
         }
     };
 
-    // Scroll detection for features section
     useEffect(() => {
         const handleScroll = () => {
             const scrollPosition = window.scrollY;
             const windowHeight = window.innerHeight;
-            // Show features when user scrolls down 50% of viewport height
             if (scrollPosition > windowHeight * 0.5) {
                 setShowFeatures(true);
             }
