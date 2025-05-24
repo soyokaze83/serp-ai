@@ -13,4 +13,5 @@ dependencies = [
     "sentence-transformers>=4.1.0",
     "numpy>=2.0",
     "uvicorn[standard]>=0.34.2",
+    "together>=1.4.6",
 ]
