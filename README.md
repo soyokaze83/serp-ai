@@ -24,6 +24,7 @@ cd backend/
 python -m venv .venv
 .venv/Scripts/activate
 pip install -r requirements.txt
+fastapi dev main.py # To run the FastAPI environment
 
 # FastAPI Python Setup (with uv)
 cd backend/
@@ -54,7 +55,7 @@ curl --cacert http_ca.crt -u elastic:$ELASTIC_PASSWORD https://localhost:9200
 
 ## Elastic Search Hosted Deployment (For Developers)
 
-We have deployed our productoin Elastic Search index on [Bonsai](https://bonsai.io/). To try and request data from the API, you can simply cURL the URL therefore you need to provide the deployed production URL for the index.
+We have deployed our productoin Elastic Search index on the official Elastic Cloud. To try and request data from the API, you can simply cURL the URL therefore you need to provide the deployed production URL for the index.
 
 ```
 export ELASTIC_URL="ES_PROJECT_URL"
@@ -62,3 +63,5 @@ curl $ELASTIC_URL
 ```
 
 Note that this means you would need to set the environment variables for `ELASTIC_URL`.
+
+For searching with a query input, we implement the routing of the URL to `$ELASTIC_URL/search/{query}`.
