@@ -65,11 +65,36 @@ export default function SearchLanding() {
         setIsSearching(true);
         setShowResults(false);
 
-        // Simulate search processing
-        await new Promise((resolve) => setTimeout(resolve, 2000));
+        try {
+            // Make API call to search endpoint
+            const response = await fetch(
+                `https://moral-kiah-soyokaze83-45241348.koyeb.app/search/${encodeURIComponent(
+                    searchQuery
+                )}`
+            );
 
-        setIsSearching(false);
-        setShowResults(true);
+            if (!response.ok) {
+                throw new Error("Search failed");
+            }
+
+            const searchResults = await response.json();
+
+            // Navigate to results page with the data
+            // Store results in sessionStorage for the results page
+            sessionStorage.setItem(
+                "searchResults",
+                JSON.stringify(searchResults)
+            );
+            sessionStorage.setItem("searchQuery", searchQuery);
+
+            // Navigate to results page
+            window.location.href = "/results";
+        } catch (error) {
+            console.error("Search error:", error);
+            setIsSearching(false);
+            // You could add error state handling here
+            alert("Search failed. Please try again.");
+        }
     };
 
     const resetSearch = () => {
