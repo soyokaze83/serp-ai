@@ -207,7 +207,7 @@ export default function SearchLanding() {
                             </svg>
                         </button>
 
-                        <nav className="hidden sm:flex items-center space-x-8">
+                        <nav className="hidden sm:flex items-center">
                             <button
                                 onClick={() => scrollToSection("hero")}
                                 className={`transition-colors duration-200 font-medium relative group ${
@@ -217,17 +217,6 @@ export default function SearchLanding() {
                                 }`}
                             >
                                 Search
-                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
-                            </button>
-                            <button
-                                onClick={() => scrollToSection("features")}
-                                className={`transition-colors duration-200 font-medium relative group ${
-                                    isDarkMode
-                                        ? "text-slate-300 hover:text-white"
-                                        : "text-slate-600 hover:text-slate-900"
-                                }`}
-                            >
-                                Features
                                 <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-300 group-hover:w-full"></span>
                             </button>
                         </nav>
@@ -452,154 +441,10 @@ export default function SearchLanding() {
                                 </Card>
                             )}
                         </div>
-
-                        {/* Scroll indicator */}
-                        {!showFeatures && (
-                            <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-                                <div
-                                    className={`flex flex-col items-center ${
-                                        isDarkMode
-                                            ? "text-slate-500"
-                                            : "text-slate-400"
-                                    }`}
-                                >
-                                    <span className="text-sm mb-2">
-                                        Scroll to explore
-                                    </span>
-                                    <div
-                                        className={`w-6 h-10 border-2 rounded-full flex justify-center ${
-                                            isDarkMode
-                                                ? "border-slate-600"
-                                                : "border-slate-300"
-                                        }`}
-                                    >
-                                        <div
-                                            className={`w-1 h-3 rounded-full mt-2 animate-pulse ${
-                                                isDarkMode
-                                                    ? "bg-slate-600"
-                                                    : "bg-slate-300"
-                                            }`}
-                                        ></div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
             </section>
 
-            {/* Features Section - Hidden initially, revealed on scroll */}
-            <section
-                id="features-section"
-                className={`transition-all duration-1000 ease-out ${
-                    showFeatures
-                        ? "opacity-100 translate-y-0"
-                        : "opacity-0 translate-y-20 pointer-events-none"
-                }`}
-            >
-                <div className="min-h-screen flex items-center justify-center px-4 py-20">
-                    <div className="max-w-6xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2
-                                className={`text-4xl md:text-5xl font-bold mb-6 transition-colors duration-300 ${
-                                    isDarkMode ? "text-white" : "text-slate-900"
-                                }`}
-                            >
-                                Why Choose SERP-AI?
-                            </h2>
-                            <p
-                                className={`text-xl max-w-3xl mx-auto transition-colors duration-300 ${
-                                    isDarkMode
-                                        ? "text-slate-300"
-                                        : "text-slate-600"
-                                }`}
-                            >
-                                Our advanced search engine combines the power of
-                                Elasticsearch with AI-driven result verification
-                            </p>
-                        </div>
-
-                        <div className="grid md:grid-cols-3 gap-8">
-                            {[
-                                {
-                                    icon: Zap,
-                                    title: "Lightning Fast",
-                                    description:
-                                        "Get instant results powered by optimized Elasticsearch indexing and intelligent caching",
-                                    color: "blue",
-                                    delay: "delay-0",
-                                },
-                                {
-                                    icon: Sparkles,
-                                    title: "AI-Enhanced",
-                                    description:
-                                        "Every search result is verified and enhanced by our integrated language models for accuracy",
-                                    color: "purple",
-                                    delay: "delay-200",
-                                },
-                                {
-                                    icon: Shield,
-                                    title: "Reliable Results",
-                                    description:
-                                        "Trust in search results that are fact-checked and contextually relevant to your queries",
-                                    color: "green",
-                                    delay: "delay-400",
-                                },
-                            ].map((feature, index) => {
-                                const IconComponent = feature.icon;
-                                return (
-                                    <Card
-                                        key={feature.title}
-                                        className={`border-0 shadow-xl hover:shadow-2xl transition-all duration-500 hover:-translate-y-2 ${
-                                            showFeatures
-                                                ? `animate-fade-in-up ${feature.delay}`
-                                                : ""
-                                        } ${
-                                            isDarkMode
-                                                ? "bg-slate-800"
-                                                : "bg-white"
-                                        }`}
-                                    >
-                                        <CardContent className="p-10 text-center">
-                                            <div
-                                                className={`w-20 h-20 bg-${
-                                                    feature.color
-                                                }-100 rounded-3xl flex items-center justify-center mx-auto mb-8 ${
-                                                    isDarkMode
-                                                        ? `bg-${feature.color}-900/50`
-                                                        : `bg-${feature.color}-100`
-                                                }`}
-                                            >
-                                                <IconComponent
-                                                    className={`w-10 h-10 text-${feature.color}-600`}
-                                                />
-                                            </div>
-                                            <h3
-                                                className={`text-2xl font-semibold mb-4 transition-colors duration-300 ${
-                                                    isDarkMode
-                                                        ? "text-white"
-                                                        : "text-slate-900"
-                                                }`}
-                                            >
-                                                {feature.title}
-                                            </h3>
-                                            <p
-                                                className={`text-lg leading-relaxed transition-colors duration-300 ${
-                                                    isDarkMode
-                                                        ? "text-slate-300"
-                                                        : "text-slate-600"
-                                                }`}
-                                            >
-                                                {feature.description}
-                                            </p>
-                                        </CardContent>
-                                    </Card>
-                                );
-                            })}
-                        </div>
-                    </div>
-                </div>
-            </section>
 
             {/* Footer */}
             <footer
